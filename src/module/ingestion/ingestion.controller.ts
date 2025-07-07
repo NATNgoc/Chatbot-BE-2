@@ -1,31 +1,30 @@
 import {
   Controller,
-  FileTypeValidator,
-  HttpStatus,
-  MaxFileSizeValidator,
-  ParseFilePipe,
   Post,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ALLOWED_MIME_TYPES, REGREX_MIME_TYPE } from 'src/common/constant';
-import { CustomFileTypeValidator } from 'src/common/interceptor/custom-file.interceptor';
+import { EnhanceDocumentService } from './enhance-document.service';
+import { IngestionService } from './ingestion.service';
 
 @Controller('ingestion')
 export class IngestionController {
+  constructor(
+    private readonly ingestionService: IngestionService,
+    private readonly enhanceDocumentService: EnhanceDocumentService,
+  ) {}
+
   @Post('upload')
   @UseInterceptors(FilesInterceptor('files'))
-  uploadFile(
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 20 * 1024 * 1024 }),
-          new CustomFileTypeValidator({}),
-        ],
-        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      }),
-    )
+  async uploadFile(
+    @UploadedFiles()
     files: Array<Express.Multer.File>,
-  ) {}
+  ) {
+    const docs = await this.ingestionService.ingestionFiles();
+    return {
+      message: 'Files uploaded successfully',
+      filesCount: files.length,
+    };
+  }
 }

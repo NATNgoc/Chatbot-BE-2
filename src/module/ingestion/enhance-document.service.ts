@@ -12,8 +12,6 @@ export class EnhanceDocumentService {
     return cleanedDocuments;
   }
 
-  async addTextSplittersAndExtractors() {}
-
   async removeNonValuableMetadata(
     documents: Document<Metadata>[],
   ): Promise<Document<Metadata>[]> {

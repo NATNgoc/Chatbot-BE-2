@@ -10,10 +10,7 @@ import { IngestionService } from './ingestion.service';
 
 @Controller('ingestion')
 export class IngestionController {
-  constructor(
-    private readonly ingestionService: IngestionService,
-    private readonly enhanceDocumentService: EnhanceDocumentService,
-  ) {}
+  constructor(private readonly ingestionService: IngestionService) {}
 
   @Post('upload')
   @UseInterceptors(FilesInterceptor('files'))
@@ -21,7 +18,7 @@ export class IngestionController {
     @UploadedFiles()
     files: Array<Express.Multer.File>,
   ) {
-    const docs = await this.ingestionService.ingestionFiles();
+    const docs = await this.ingestionService.ingestFiles();
     return {
       message: 'Files uploaded successfully',
       filesCount: files.length,

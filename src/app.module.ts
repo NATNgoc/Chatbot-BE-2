@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { IngestionModule } from './module/ingestion/ingestion.module';
 import { QdrantModule } from './core/database/qdrant/qdrant.module';
 import { ChatModule } from './module/chat/chat.module';
+import { LlamaIndexConfigModule } from './core/llmaindexConfig/inital-cofig.module';
 
 @Module({
   imports: [
@@ -15,6 +16,8 @@ import { ChatModule } from './module/chat/chat.module';
       isGlobal: true,
     }),
     QdrantModule,
+    LlamaIndexConfigModule,
+
     ChatModule,
   ],
   controllers: [AppController],

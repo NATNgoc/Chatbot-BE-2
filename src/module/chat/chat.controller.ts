@@ -9,6 +9,7 @@ import {
   VectorStoreQueryResult,
   MetadataMode,
 } from 'llamaindex';
+import { OpenAI } from '@llamaindex/openai';
 
 @Controller('chats')
 export class ChatController {
@@ -35,13 +36,29 @@ export class ChatController {
       },
     );
 
+    const contexts = (result.nodes ?? [])
+      .map((node) => node.getContent(MetadataMode.LLM))
+      .filter(Boolean)
+      .join('\n\n');
+
+    const prompt = `
+    Based on the following information, please answer the user's question accurately and in detail.
+    Note: Please answer according to the language of the question.
+
+    REFERENCE INFORMATION:
+    ${contexts}
+
+    QUESTION: ${query}
+
+    ANSWER:`;
+
+    const llmResponse = await Settings.llm.complete({
+      prompt: prompt,
+    });
+
     return {
       message: `Chat created successfully`,
-      results: (result.nodes ?? []).map((node) => ({
-        content: node.getContent(MetadataMode.ALL),
-        // score: node.getScore(),
-        metadata: node.metadata,
-      })),
+      results: llmResponse,
     };
   }
 }

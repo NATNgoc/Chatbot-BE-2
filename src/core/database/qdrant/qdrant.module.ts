@@ -1,23 +1,24 @@
-import { OpenAIEmbedding } from '@llamaindex/openai';
 import { QdrantVectorStore } from '@llamaindex/qdrant';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Settings } from 'llamaindex';
 import { EnvKeyConstant } from 'src/common/constant';
 import { PROVIDER_KEY } from 'src/common/constant/provider_key';
+import {
+  LlamaIndexConfigModule,
+  LlamaIndexConfigService,
+} from 'src/core/llmaindexConfig/inital-cofig.module';
 
 @Global()
 @Module({
-  imports: [],
+  imports: [LlamaIndexConfigModule],
   controllers: [],
   providers: [
     {
       provide: PROVIDER_KEY.QDRANT,
-      useFactory: (configService: ConfigService): QdrantVectorStore => {
-        Settings.embedModel = new OpenAIEmbedding({
-          apiKey: configService.get<string>(EnvKeyConstant.OPENAI_API_KEY),
-          model: 'text-embedding-3-small',
-        });
+      useFactory: async (
+        configService: ConfigService,
+        _: LlamaIndexConfigService,
+      ): Promise<QdrantVectorStore> => {
         return new QdrantVectorStore({
           url:
             configService.get<string>(EnvKeyConstant.QDRANT_URL) ||
@@ -27,7 +28,7 @@ import { PROVIDER_KEY } from 'src/common/constant/provider_key';
             'documents',
         });
       },
-      inject: [ConfigService],
+      inject: [ConfigService, LlamaIndexConfigService],
     },
   ],
   exports: [PROVIDER_KEY.QDRANT],
